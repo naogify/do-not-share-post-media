@@ -13,7 +13,7 @@
  */
 
 function dnspm_add_theme_caps() {
-	$role = get_role( 'author' );
+	$role = get_role( 'contributor' );
 	// これは、クラスインスタンスにアクセスする場合のみ機能します。
 	// 現在のテーマにおいてのみ、投稿者は他の人の投稿を編集することができます。
 	$role->add_cap( 'upload_files' );
@@ -99,10 +99,14 @@ function dnspm_change_post_label() {
 add_action( 'admin_menu', 'dnspm_change_post_label' );
 
 //最近の釣果カテゴリーを投稿時に追加。
-function dnspm_set_default_category( $post_id ) {
+function dnspm_set_default_category( $post_id, $post ) {
 
 	if ( is_admin() || current_user_can( 'contributor' ) ) {
-		wp_set_post_categories( $post_id, array( '14' ), false );
+
+		if($post->status == 'pending'){
+			wp_set_post_categories( $post_id, array( '14' ), false );
+		}
 	}
 }
-add_action( 'save_post', 'dnspm_set_default_category', 10, 1 );
+
+add_action( 'save_post', 'dnspm_set_default_category', 10, 2 );
