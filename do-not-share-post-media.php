@@ -18,7 +18,6 @@ function dnspm_add_theme_caps() {
 	// 現在のテーマにおいてのみ、投稿者は他の人の投稿を編集することができます。
 	$role->add_cap( 'upload_files' );
 }
-
 add_action( 'admin_init', 'dnspm_add_theme_caps' );
 
 function dnspm_display_only_self_uploaded_medias( $query ) {
@@ -27,7 +26,6 @@ function dnspm_display_only_self_uploaded_medias( $query ) {
 	}
 	return $query;
 }
-
 add_action( 'ajax_query_attachments_args', 'dnspm_display_only_self_uploaded_medias' );
 
 
@@ -48,7 +46,6 @@ function dnspm_pre_get_author_posts( $query ) {
 		unset($_GET['author']);
 	}
 }
-
 add_action( 'pre_get_posts', 'dnspm_pre_get_author_posts' );
 
 /**
@@ -88,8 +85,8 @@ function dnspm_count_author_posts( $counts, $type = 'post', $perm = '' ) {
 	wp_cache_set( $cache_key, $counts, 'counts' );
 	return $counts; // 1
 }
-
 add_filter( 'wp_count_posts', 'dnspm_count_author_posts', 10, 3 );
+
 function dnspm_change_post_label() {
 
 	if ( ! is_admin() || ! current_user_can( 'administrator' ) ) {
@@ -99,7 +96,6 @@ function dnspm_change_post_label() {
 		$submenu['edit.php'][5][0] = '釣果一覧';
 	}
 }
-
 add_action( 'admin_menu', 'dnspm_change_post_label' );
 
 //最近の釣果カテゴリーを投稿時に追加。
@@ -109,5 +105,4 @@ function dnspm_set_default_category( $post_id ) {
 		wp_set_post_categories( $post_id, array( '14' ), false );
 	}
 }
-
 add_action( 'save_post', 'dnspm_set_default_category', 10, 1 );
