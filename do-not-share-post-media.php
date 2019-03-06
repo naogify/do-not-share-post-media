@@ -108,5 +108,17 @@ function dnspm_set_default_category( $post_id, $post ) {
 		}
 	}
 }
-
 add_action( 'save_post', 'dnspm_set_default_category', 10, 2 );
+
+function dnspm_customize_admin_bar_menu($wp_admin_bar){
+	if(!current_user_can('delete_posts')){
+		$wp_admin_bar->remove_node('wp-logo');
+		// $wp_admin_bar->remove_node('site-name');   // 左から2番めのサイト名を消す。
+		$wp_admin_bar->remove_node('new-content'); // 「＋ 新規」ってメニューを消す。
+		$wp_admin_bar->remove_node('comments'); // 「＋ 新規」ってメニューを消す。
+		// Adminバー右側
+		// $wp_admin_bar->remove_node('my-account'); // アカウントのメニューを消す。
+		$wp_admin_bar->remove_node('search');     // 検索のメニューを消す。
+	}
+}
+add_action('admin_bar_menu', 'dnspm_customize_admin_bar_menu',999);
