@@ -50,16 +50,13 @@ function dnspm_render_settings() {
 		$dnspm_common_hiringOrganization_logo = '';
 	}
 
-	echo '<h1>' . __( '設定ページ', 'do-not-share-post-media' ) . '</h1>';
+	echo '<h1>' . __( 'Do not Share Posts and Media Settings', 'do-not-share-post-media' ) . '</h1>';
 	echo '<form method="post" action="">';
 	wp_nonce_field( 'standing_on_the_shoulder_of_giants', '_nonce_dnspm' );
-	echo '<h2>' . __( '会社情報', 'do-not-share-post-media' ) . '</h2>';
-	echo '会社名:<br> <input type="text" name="job_posting_common_hiringOrganization_name" value="' . $dnspm_common_hiringOrganization_name . '"><br>';
-	echo 'URL:<br> <input type="text" name="job_posting_common_hiringOrganization_url" value="' . $dnspm_common_hiringOrganization_url . '"><br>';
-	echo 'ロゴ:<br> <input type="text" name="job_posting_common_hiringOrganization_logo" value="' . $dnspm_common_hiringOrganization_logo . '"><br>';
+	echo '<h2>' . __( 'User roles do not share', 'do-not-share-post-media' ) . '</h2>';
+	dnspm_user_roles_do_not_share();
 	echo '<h2>' . __( 'Post types do not share', 'do-not-share-post-media' ) . '</h2>';
-	dnspm_user_group_do_not_share();
-	dnspm_post_type_do_not_share();
+	dnspm_post_types_do_not_share();
 	echo '<input type="submit" value="Save Changes">';
 	echo '</form>';
 
@@ -99,28 +96,22 @@ function dnspm_save_data() {
 	}
 }
 
-function dnspm_user_group_do_not_share() {
+function dnspm_user_roles_do_not_share() {
 
-	$args       = array(
-		'public' => true,
-	);
-	$post_types = get_post_types( $args, 'object' );
+	$user_roles = get_editable_roles() ;
 
 	echo '<ul>';
-	foreach ( $post_types as $key => $value ) {
-		if ( $key != 'page' ) {
-
-			$checked_saved = get_option( 'dnspm_post_type_display_customfields' . $key );
+	foreach ( $user_roles as $key => $value ) {
+			$checked_saved = get_option( 'dnspm_user_roles_customfields' . $key );
 			$checked       = ( isset( $checked_saved ) && $checked_saved == 'true' ) ? ' checked' : '';
 			echo '<li><label>';
-			echo '<input type="checkbox" name="dnspm_post_type_display_customfields' . $key . '" value="true"' . $checked . ' />' . esc_html( $value->label );
+			echo '<input type="checkbox" name="dnspm_user_roles_customfields' . $key . '" value="true"' . $checked . ' />' . esc_html( $value['name'] );
 			echo '</label></li>';
-		}
 	}
 	echo '</ul>';
 }
 
-function dnspm_post_type_do_not_share() {
+function dnspm_post_types_do_not_share() {
 
 	$args       = array(
 		'public' => true,
@@ -131,10 +122,10 @@ function dnspm_post_type_do_not_share() {
 	foreach ( $post_types as $key => $value ) {
 		if ( $key != 'page' ) {
 
-			$checked_saved = get_option( 'dnspm_post_type_display_customfields' . $key );
+			$checked_saved = get_option( 'dnspm_post_type_customfields' . $key );
 			$checked       = ( isset( $checked_saved ) && $checked_saved == 'true' ) ? ' checked' : '';
 			echo '<li><label>';
-			echo '<input type="checkbox" name="dnspm_post_type_display_customfields' . $key . '" value="true"' . $checked . ' />' . esc_html( $value->label );
+			echo '<input type="checkbox" name="dnspm_post_type_customfields' . $key . '" value="true"' . $checked . ' />' . esc_html( $value->label );
 			echo '</label></li>';
 		}
 	}
