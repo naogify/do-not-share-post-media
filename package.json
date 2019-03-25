@@ -4,6 +4,11 @@
   "version": "0.1.0",
   "main": "Gruntfile.js",
   "author": "YOUR NAME HERE",
+  "scripts": {
+    "start": "npm install && npm run build && npm run watch && wp plugin activate vk-job-posting && wp browse --wp-admin",
+    "test": "phpunit --testdox",
+    "test-unit": "bash bin/install-wp-tests.sh wordpress_test root 'wordpress' localhost latest && phpunit --testdox"
+  },
   "devDependencies": {
     "grunt": "~0.4.5",
     "grunt-wp-i18n": "~0.5.0",
