@@ -12,6 +12,135 @@
  * @package         Do_Not_Share_Post_Media
  */
 
+/**
+ *`job_posts` 投稿タイプのサブメニューに、設定ページを追加。
+ */
+function dnspm_add_setting_menu() {
+	$custom_page = add_submenu_page(
+		'/options-general.php',
+		__( 'Do not Share Posts and Media Settings', 'do-not-share-post-media' ),
+		__( 'Do not Share Posts and Media Settings', 'do-not-share-post-media' ),
+		'activate_plugins',
+		'dnspm_settings',
+		'dnspm_render_settings'
+	);
+}
+
+add_action( 'admin_menu', 'dnspm_add_setting_menu' );
+
+/**
+ *設定ページの中身を表示。
+ */
+function dnspm_render_settings() {
+
+	//保存処理をページに追加
+	dnspm_save_data();
+
+	$dnspm_common_hiringOrganization_name = get_option( 'dnspm_common_hiringOrganization_name' );
+	$dnspm_common_hiringOrganization_url  = get_option( 'dnspm_common_hiringOrganization_url' );
+	$dnspm_common_hiringOrganization_logo = get_option( 'dnspm_common_hiringOrganization_logo' );
+
+	if ( ! isset( $dnspm_common_hiringOrganization_name ) ) {
+		$dnspm_common_hiringOrganization_name = '';
+	}
+	if ( ! isset( $dnspm_common_hiringOrganization_url ) ) {
+		$dnspm_common_hiringOrganization_url = '';
+	}
+	if ( ! isset( $dnspm_common_hiringOrganization_logo ) ) {
+		$dnspm_common_hiringOrganization_logo = '';
+	}
+
+	echo '<h1>' . __( '設定ページ', 'do-not-share-post-media' ) . '</h1>';
+	echo '<form method="post" action="">';
+	wp_nonce_field( 'standing_on_the_shoulder_of_giants', '_nonce_dnspm' );
+	echo '<h2>' . __( '会社情報', 'do-not-share-post-media' ) . '</h2>';
+	echo '会社名:<br> <input type="text" name="job_posting_common_hiringOrganization_name" value="' . $dnspm_common_hiringOrganization_name . '"><br>';
+	echo 'URL:<br> <input type="text" name="job_posting_common_hiringOrganization_url" value="' . $dnspm_common_hiringOrganization_url . '"><br>';
+	echo 'ロゴ:<br> <input type="text" name="job_posting_common_hiringOrganization_logo" value="' . $dnspm_common_hiringOrganization_logo . '"><br>';
+	echo '<h2>' . __( 'Post types do not share', 'do-not-share-post-media' ) . '</h2>';
+	dnspm_user_group_do_not_share();
+	dnspm_post_type_do_not_share();
+	echo '<input type="submit" value="Save Changes">';
+	echo '</form>';
+
+
+}
+
+function dnspm_save_data() {
+
+	// nonce
+	if ( ! isset( $_POST['_nonce_dnspm'] ) ) {
+		return;
+	}
+	if ( ! wp_verify_nonce( $_POST['_nonce_dnspm'], 'standing_on_the_shoulder_of_giants' ) ) {
+		return;
+	}
+
+	update_option( 'dnspm_common_hiringOrganization_name', $_POST['job_posting_common_hiringOrganization_name'] );
+	update_option( 'dnspm_common_hiringOrganization_url', $_POST['job_posting_common_hiringOrganization_url'] );
+	update_option( 'dnspm_common_hiringOrganization_logo', $_POST['job_posting_common_hiringOrganization_logo'] );
+
+	$args       = array(
+		'public' => true,
+	);
+	$post_types = get_post_types( $args, 'object' );
+
+	foreach ( $post_types as $key => $value ) {
+		if ( $key != 'attachment' ) {
+
+			$name = 'dnspm_post_type_display_customfields' . $key;
+
+			if ( isset( $_POST[ $name ] ) ) {
+				update_option( $name, $_POST[ $name ] );
+			} else {
+				update_option( $name, 'false' );
+			}
+		}
+	}
+}
+
+function dnspm_user_group_do_not_share() {
+
+	$args       = array(
+		'public' => true,
+	);
+	$post_types = get_post_types( $args, 'object' );
+
+	echo '<ul>';
+	foreach ( $post_types as $key => $value ) {
+		if ( $key != 'page' ) {
+
+			$checked_saved = get_option( 'dnspm_post_type_display_customfields' . $key );
+			$checked       = ( isset( $checked_saved ) && $checked_saved == 'true' ) ? ' checked' : '';
+			echo '<li><label>';
+			echo '<input type="checkbox" name="dnspm_post_type_display_customfields' . $key . '" value="true"' . $checked . ' />' . esc_html( $value->label );
+			echo '</label></li>';
+		}
+	}
+	echo '</ul>';
+}
+
+function dnspm_post_type_do_not_share() {
+
+	$args       = array(
+		'public' => true,
+	);
+	$post_types = get_post_types( $args, 'object' );
+
+	echo '<ul>';
+	foreach ( $post_types as $key => $value ) {
+		if ( $key != 'page' ) {
+
+			$checked_saved = get_option( 'dnspm_post_type_display_customfields' . $key );
+			$checked       = ( isset( $checked_saved ) && $checked_saved == 'true' ) ? ' checked' : '';
+			echo '<li><label>';
+			echo '<input type="checkbox" name="dnspm_post_type_display_customfields' . $key . '" value="true"' . $checked . ' />' . esc_html( $value->label );
+			echo '</label></li>';
+		}
+	}
+	echo '</ul>';
+}
+
 function dnspm_add_theme_caps() {
 	$role = get_role( 'contributor' );
 	// これは、クラスインスタンスにアクセスする場合のみ機能します。
@@ -86,39 +215,3 @@ function dnspm_count_author_posts( $counts, $type = 'post', $perm = '' ) {
 	return $counts; // 1
 }
 add_filter( 'wp_count_posts', 'dnspm_count_author_posts', 10, 3 );
-
-function dnspm_change_post_label() {
-
-	if ( ! is_admin() || ! current_user_can( 'administrator' ) ) {
-		global $menu;
-		global $submenu;
-		$menu[5][0]                = '釣果を投稿';
-		$submenu['edit.php'][5][0] = '釣果一覧';
-	}
-}
-add_action( 'admin_menu', 'dnspm_change_post_label' );
-
-//最近の釣果カテゴリーを投稿時に追加。
-function dnspm_set_default_category( $post_id, $post ) {
-
-	if ( is_admin() || current_user_can( 'contributor' ) ) {
-
-		if($post->status == 'pending'){
-			wp_set_post_categories( $post_id, array( '14' ), false );
-		}
-	}
-}
-add_action( 'save_post', 'dnspm_set_default_category', 10, 2 );
-
-function dnspm_customize_admin_bar_menu($wp_admin_bar){
-	if(!current_user_can('delete_posts')){
-		$wp_admin_bar->remove_node('wp-logo');
-		// $wp_admin_bar->remove_node('site-name');   // 左から2番めのサイト名を消す。
-		$wp_admin_bar->remove_node('new-content'); // 「＋ 新規」ってメニューを消す。
-		$wp_admin_bar->remove_node('comments'); // 「＋ 新規」ってメニューを消す。
-		// Adminバー右側
-		// $wp_admin_bar->remove_node('my-account'); // アカウントのメニューを消す。
-		$wp_admin_bar->remove_node('search');     // 検索のメニューを消す。
-	}
-}
-add_action('admin_bar_menu', 'dnspm_customize_admin_bar_menu',999);
