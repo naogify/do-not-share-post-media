@@ -73,10 +73,6 @@ function dnspm_save_data() {
 		return;
 	}
 
-	update_option( 'dnspm_common_hiringOrganization_name', $_POST['job_posting_common_hiringOrganization_name'] );
-	update_option( 'dnspm_common_hiringOrganization_url', $_POST['job_posting_common_hiringOrganization_url'] );
-	update_option( 'dnspm_common_hiringOrganization_logo', $_POST['job_posting_common_hiringOrganization_logo'] );
-
 	$args       = array(
 		'public' => true,
 	);
@@ -85,7 +81,7 @@ function dnspm_save_data() {
 	foreach ( $post_types as $key => $value ) {
 		if ( $key != 'attachment' ) {
 
-			$name = 'dnspm_post_type_display_customfields' . $key;
+			$name = 'dnspm_user_roles_customfields' . $key;
 
 			if ( isset( $_POST[ $name ] ) ) {
 				update_option( $name, $_POST[ $name ] );
